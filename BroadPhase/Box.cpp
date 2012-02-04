@@ -4,14 +4,14 @@
 
 Box::Box(Vec3 centre, Vec3 extents)
 {
-	this->centre = centre;
+	SetPosition(centre);
 	this->extents = extents;
 	this->max = centre + (extents / 2.0f);
 	this->min = centre - (extents / 2.0f);
 	this->Colour = Vec3(0.9, 0.1, 0.0);
-	this->angularMomentum = Vec4(0.99995f, 0.0f, 0.01f, 0.0f);
-	this->orientation = Vec4(1.0f, 0.0f, 0.0f, 0.0f);
-	this->velocity = Vec3(0.03f, 0.0f, 0.0f);
+	ApplyAngularImpulse(Vec4(0.99995f, 0.0f, 0.01f, 0.0f));
+	SetOrientation(Vec4(1.0f, 0.0f, 0.0f, 0.0f));
+	ApplyImpulse(Vec3(0.03f, 0.0f, 0.0f));
 	points[0] = extents / 2.0f;
 	points[1] = Vec3(-extents[0] / 2.0f, extents[1] / 2.0f, extents[2] / 2.0f);
 	points[2] = Vec3(-extents[0] / 2.0f, -extents[1] / 2.0f, extents[2] / 2.0f);
@@ -20,6 +20,9 @@ Box::Box(Vec3 centre, Vec3 extents)
 	points[5] = Vec3(-extents[0] / 2.0f, extents[1] / 2.0f, -extents[2] / 2.0f);
 	points[6] = - points[0];
 	points[7] = Vec3(extents[0] / 2.0f, -extents[1] / 2.0f, -extents[2] / 2.0f);
+	baseBB.SetMax(max);
+	baseBB.SetMin(min);
+
 }
 
 Box::~Box(void)
@@ -46,42 +49,6 @@ bool Box::PointWithinDistance(Vec3& point, float dist)
 	return true; //fix maybe
 }
 
-Contact* Box::GetContact(Vec3& point)
-{
-	Contact* contact = new Contact();
-	float minDist = FLT_MAX;
-	int side;	
-	for (int i = 0; i < 6; ++i)
-	{
-		int coord = i / 2;
-		if (i % 2 == 0)
-		{
-			if (max[coord] - point[coord] < minDist)
-			{
-				minDist = max[coord] - point[coord];
-				side = i;
-				contact->Normal.MakeZero();
-				contact->Normal[coord] = 1.0f;
-				contact->Point = point - dot(contact->Normal, point) * contact->Normal;
-				contact->Point[coord] = max[coord];
-			}			
-		}
-		else
-		{
-			if (point[coord] - min[coord] < minDist)
-			{
-				minDist = point[coord] - min[coord];
-				side = i;
-				contact->Normal.MakeZero();
-				contact->Normal[coord] = -1.0f;
-				contact->Point = point - dot(contact->Normal, point) * contact->Normal;
-				contact->Point[coord] = min[coord];
-			}
-		}
-	}
-	return contact;
-}
-
 /*
 
 void Box::Draw()
@@ -101,7 +68,7 @@ void Box::Draw()
 void Box::Draw()
 {
 	glPushMatrix();
-	glMultMatrixf(transform.Ref());
+	glMultMatrixf(GetTransform().Ref());
 	glColor(Colour);
 	DrawQuad(0, 1, 2, 3);
 	DrawQuad(4, 5, 6, 7);
@@ -119,7 +86,7 @@ void Box::ApplyAngularMomentum(Vec3 axis, float amount)
 	float s = sin(amount);
 	axis.Normalise();
 	Vec4 quat = Vec4(cos(amount), s * axis[0], s * axis[1], s * axis[2]);
-	angularMomentum = qMultiply(angularMomentum, quat);
+	ApplyAngularImpulse(quat);
 }
 
 Vec3 Box::GetPoint(int index)
@@ -129,14 +96,13 @@ Vec3 Box::GetPoint(int index)
 
 Vec3 Box::GetTransformedPoint(int index)
 {
-	return proj(Vec4(points[index], 1.0f) * transform);
+	return proj(Vec4(points[index], 1.0f) * GetTransform());
 }
 
 void Box::Update(float msSinceLast)
 {
-	centre += velocity;
-	orientation = qMultiply(orientation, angularMomentum);
-	transform = qGetTransform(orientation) * HTrans4(centre);
+
 }
+
 
 

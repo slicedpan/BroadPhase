@@ -1,3 +1,5 @@
+#pragma once
+
 #include <svl\SVL.h>
 
 inline Mat4 qGetTransform(Vec4& quat)

@@ -79,8 +79,7 @@ void setup()
 	PhysicsSystem::GetCurrentInstance()->AddCollidable(groundPlane);
 	box2 = new Box(Vec3(0.0, 6.5, 10.0), Vec3(1.0, 5.0, 5.0));
 	box2->Colour = Vec3(0.0, 0.1, 0.4);
-	PhysicsSystem::GetCurrentInstance()->AddCollidable(box);
-	PhysicsSystem::GetCurrentInstance()->AddCollidable(box2);	
+	PhysicsSystem::GetCurrentInstance()->AddRigidBody(box2);	
 
 	glEnable(GL_LIGHTING);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
@@ -119,7 +118,7 @@ void display ()
 	}
 
 	cameraController->Update((float)elapsedTime);
-
+	PhysicsSystem::GetCurrentInstance()->Integrate((float)elapsedTime / 1000.0f);
 	Vec4 lightPos(0.0f, 100.0f, 10.0f, 1.0f);
 
  	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
