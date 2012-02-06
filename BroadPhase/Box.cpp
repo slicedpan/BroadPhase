@@ -2,31 +2,22 @@
 #include "Contact.h"
 #include "Quaternion.h"
 
-Box::Box(Vec3 centre, Vec3 extents)
+Box::Box(Vec3 centre, Vec3 extents) : RigidBody()
 {
 	SetPosition(centre);
 	this->extents = extents;
-	this->max = centre + (extents / 2.0f);
-	this->min = centre - (extents / 2.0f);
-	this->Colour = Vec3(0.9, 0.1, 0.0);
-	ApplyAngularImpulse(Vec4(0.99995f, 0.0f, 0.01f, 0.0f));
+	this->max = (extents / 2.0f);
+	this->min = -(extents / 2.0f);
+	this->Colour = Vec3(0.9, 0.1, 0.0);	
 	SetOrientation(Vec4(1.0f, 0.0f, 0.0f, 0.0f));
-	ApplyImpulse(Vec3(0.03f, 0.0f, 0.0f));
-	points[0] = extents / 2.0f;
-	points[1] = Vec3(-extents[0] / 2.0f, extents[1] / 2.0f, extents[2] / 2.0f);
-	points[2] = Vec3(-extents[0] / 2.0f, -extents[1] / 2.0f, extents[2] / 2.0f);
-	points[3] = Vec3(extents[0] / 2.0f, -extents[1] / 2.0f, extents[2] / 2.0f);
-	points[4] = Vec3(extents[0] / 2.0f, extents[1] / 2.0f, -extents[2] / 2.0f);
-	points[5] = Vec3(-extents[0] / 2.0f, extents[1] / 2.0f, -extents[2] / 2.0f);
-	points[6] = - points[0];
-	points[7] = Vec3(extents[0] / 2.0f, -extents[1] / 2.0f, -extents[2] / 2.0f);
 	baseBB.SetMax(max);
 	baseBB.SetMin(min);
-
+	points = baseBB.GeneratePoints();
 }
 
 Box::~Box(void)
 {
+	free(points);
 }
 
 bool Box::PointIntersects(Vec3& point)
@@ -63,8 +54,6 @@ void Box::Draw()
 
 */
 
-
-
 void Box::Draw()
 {
 	glPushMatrix();
@@ -78,8 +67,6 @@ void Box::Draw()
 	DrawQuad(3, 0, 4, 7);
 	glPopMatrix();
 }
-
-
 
 void Box::ApplyAngularMomentum(Vec3 axis, float amount)
 {

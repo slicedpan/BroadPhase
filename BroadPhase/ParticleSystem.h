@@ -21,6 +21,7 @@ public:
 	{
 		return particles.size();
 	}
+	static Vec3 RandomVector(float maxLength);
 private:
 	std::vector<ColouredParticle*> particles;
 	std::vector<IForceField*> forces;
@@ -28,8 +29,7 @@ private:
 	int particleNum;
 	int msCounter;
 	float msTimeBetweenSpawn;
-	void CreateParticle();
-	Vec3 RandomVector(float maxLength);
+	void CreateParticle();	
 	int particleLifetime;
 	int particleCounter;
 };

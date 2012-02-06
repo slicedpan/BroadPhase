@@ -6,7 +6,6 @@
 
 PhysicsSystem * PhysicsSystem::currentInstance;
 
-
 PhysicsSystem::PhysicsSystem(void) : debugDrawer(0)
 {
 }
@@ -22,6 +21,7 @@ void PhysicsSystem::DrawDebug()
 	for (int i = 0; i < rigidBodies.size(); ++i)
 	{
 		debugDrawer->DrawAABB(rigidBodies[i]->GetAABB(), rigidBodies[i]->GetDebugColour());
+		//debugDrawer->DrawRigidBodyMotion(*rigidBodies[i]);
 	}
 }
 
@@ -45,11 +45,13 @@ void PhysicsSystem::Integrate(float timeStep)
 	float timeSquared = timeStep * timeStep;
 	for (int i = 0; i < rigidBodies.size(); ++i)
 	{
-		rigidBodies[i]->SetPosition(2 * rigidBodies[i]->GetPosition() - rigidBodies[i]->GetLastPosition() + rigidBodies[i]->GetAcceleration() * timeSquared);
+		rigidBodies[i]->SetDebugColour(Vec4(1, 1, 1, 1));
+		rigidBodies[i]->SetPosition((2 * rigidBodies[i]->GetPosition()) - rigidBodies[i]->GetLastPosition() + rigidBodies[i]->GetAcceleration() * timeSquared);
 		rigidBodies[i]->SetOrientation(qMultiply(rigidBodies[i]->GetOrientation(), rigidBodies[i]->GetAngularVelocity()));
 		rigidBodies[i]->CalculateTransform();
 		rigidBodies[i]->CalculateBB();
 	}	
+	broadPhase.GenerateCollisions();
 }
 
 void PhysicsSystem::AddRigidBody(RigidBody* bodyToAdd)

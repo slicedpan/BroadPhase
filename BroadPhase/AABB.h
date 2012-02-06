@@ -36,10 +36,10 @@ public:
 		CalcCentre();
 	}
 	AABB Transform(Mat4& transform);
+	Vec3* GeneratePoints();
 private:
 	Vec3 min;
-	Vec3 max;
-	Vec3* GeneratePoints();
+	Vec3 max;	
 	Vec3 centre;
 	inline void CalcCentre()
 	{

@@ -35,16 +35,16 @@ void Plane::Draw()
 	glBegin(GL_LINES);
 		glColor3f(1.0, 0.0, 0.0);
 		glVertex(position);
-		glVertex(position + v1);
+		glVertex(position + Vec3(1, 0, 0));
 		glColor3f(0.0, 1.0, 0.0);
 		glVertex(position);
-		glVertex(position + v2);
+		glVertex(position + Vec3(0, 0, 1));
 		glColor3f(0.0, 0.0, 1.0);
 		glVertex(position);
 		glVertex(position + normal);
 	glEnd();
-	glEnable(GL_LIGHTING);
 
+	glEnable(GL_LIGHTING);
 	glBegin(GL_QUADS);
 		glColor3f(0.3, 0.3, 0.3);
 		glVertex(position + (v1 - v2) * 1000.0f);

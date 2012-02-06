@@ -33,7 +33,7 @@ private:
 	Vec3 extents;
 	Vec3 max;
 	Vec3 min;
-	Vec3 points[8];	
+	Vec3* points;	
 };
 
 

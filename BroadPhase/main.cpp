@@ -15,6 +15,7 @@
 #include "GravitationalForce.h"
 #include "CentralForce.h"
 #include "Box.h"
+#include "DefaultDebugDrawer.h"
 
 using namespace std;
 
@@ -54,13 +55,33 @@ int fps = 60;
 
 Plane * groundPlane;
 ColouredParticleSystem* particleSystem;
-Box * box;
-Box * box2;
+
+Vec3 maxPos(25, 30, 25);
+Vec3 minPos(-25, 10, -25);
+
+AABB bounds(minPos, maxPos);
+
+Box* testBox;
+
+std::vector<Box*> boxes;
+int numBoxes = 10;
+Vec3 testVel;
 
 // This function is called to display the scene.
 
+void AddBox()
+{
+	Box* box = new Box(ColouredParticleSystem::RandomVector(30.0) + Vec3(0, 15, 0), ColouredParticleSystem::RandomVector(10.0) + Vec3(0.3, 0.3, 0.3));
+	box->ApplyImpulse(ColouredParticleSystem::RandomVector(0.2));
+	box->ApplyAngularMomentum(ColouredParticleSystem::RandomVector(1), ((float)rand() * 0.1) / RAND_MAX);
+	box->Colour = ColouredParticleSystem::RandomVector(1);
+	boxes.push_back(box);
+	PhysicsSystem::GetCurrentInstance()->AddRigidBody(box);
+}
+
 void setup()
 {
+	srand(time(NULL));
 	camera = new FPSCamera();
 	cameraController = new CameraController();
 	cameraController->SetCamera(camera);
@@ -77,12 +98,20 @@ void setup()
 	glutSetCursor(GLUT_CURSOR_NONE);
 	groundPlane = new Plane(Vec3(0.0, 1.0, 0.0), Vec3(0.0, 0.0, 0.0));
 	PhysicsSystem::GetCurrentInstance()->AddCollidable(groundPlane);
-	box2 = new Box(Vec3(0.0, 6.5, 10.0), Vec3(1.0, 5.0, 5.0));
-	box2->Colour = Vec3(0.0, 0.1, 0.4);
-	PhysicsSystem::GetCurrentInstance()->AddRigidBody(box2);	
 
+	for (int i = 0; i < numBoxes; ++i)
+	{
+		AddBox();
+	}
+
+	testBox = boxes[0];
+	testVel = testBox->GetVelocity();
+	testBox->SetDebugColour(Vec4(1, 0, 0, 1));
+
+	PhysicsSystem::GetCurrentInstance()->SetDebugDrawer(new DefaultDebugDrawer());
 	glEnable(GL_LIGHTING);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 	float spec[4];
 	spec[0] = 1.0f;
 	spec[1] = 1.0f;
@@ -107,6 +136,8 @@ void display ()
 	int elapsedTime = (currentTime - lastTime);
 	lastTime = currentTime;
 
+	glEnable(GL_DEPTH_TEST);
+
 	++frameCounter;
 	frameTimeCount += elapsedTime;
 
@@ -127,8 +158,35 @@ void display ()
 	
 	glMultMatrixf(camera->GetViewTransform().Ref()); //apply camera transform
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPos.Ref());
-	box2->Draw();
+	
+	
 	groundPlane->Draw();
+
+	for (int i = 0; i < boxes.size(); ++i)
+	{
+		boxes[i]->Draw();
+		Vec3& pos = boxes[i]->GetPosition();
+		Vec3& vel = boxes[i]->GetVelocity();
+		Vec3 imp = Vec3(0, 0, 0);
+		
+		for (int j = 0; j < 3; ++j)
+		{		
+			if (pos[j] > maxPos[j])	
+			{
+				imp[j] = maxPos[j] - pos[j];						
+			}
+			else if (pos[j] < minPos[j])
+			{
+				imp[j] = minPos[j] - pos[j];
+			}
+			boxes[i]->ApplyForce(imp);	
+		}		
+
+	}
+
+	glDisable(GL_LIGHTING);
+	PhysicsSystem::GetCurrentInstance()->DrawDebug();
+	PhysicsSystem::GetCurrentInstance()->GetDebugDrawer()->DrawAABB(bounds, Vec4(0, 0, 1, 1));
 	/*
 	//Draw model axes.
 	glBegin(GL_LINES);
@@ -179,13 +237,18 @@ void HandleInput()
 		cameraController->MoveDown();
 	}
 
-	if (keystate['r'] && !lastKeystate['r'])
-		box2->ApplyAngularMomentum(Vec3(1.0f, 0.0f, 0.0f), 0.01f);
-
+	if (keystate['b'])
+	{
+		AddBox();
+	}
+	
 	if (keystate[27])
 		exit(0);
 	if (keystate['h'])
+	{
 		int i = 0;
+		testBox = testBox;
+	}
 
 	memcpy(lastKeystate, keystate, sizeof(bool) * 256);
 
@@ -220,7 +283,6 @@ void idle ()
 
 	cameraController->ChangePitch(-dMouseY);
 	cameraController->ChangeYaw(-dMouseX);
-	box2->Update(16);
 	glutWarpPointer(width / 2, height / 2);
 
 	glutPostRedisplay();

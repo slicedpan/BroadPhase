@@ -25,6 +25,7 @@ public:
 	ICollidable* CollideWith(Vec3 point);
 	void DrawDebug();
 	void SetDebugDrawer(IDebugDrawer* debugDrawer);
+	inline IDebugDrawer* GetDebugDrawer() {return debugDrawer;};
 private:
 	static PhysicsSystem * currentInstance;
 	IDebugDrawer*  debugDrawer;
