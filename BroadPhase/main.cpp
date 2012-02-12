@@ -64,16 +64,16 @@ AABB bounds(minPos, maxPos);
 Box* testBox;
 
 std::vector<Box*> boxes;
-int numBoxes = 10;
+int numBoxes = 2;
 Vec3 testVel;
 
 // This function is called to display the scene.
 
 void AddBox()
 {
-	Box* box = new Box(ColouredParticleSystem::RandomVector(30.0) + Vec3(0, 15, 0), ColouredParticleSystem::RandomVector(10.0) + Vec3(0.3, 0.3, 0.3));
+	Box* box = new Box(ColouredParticleSystem::RandomVector(30.0) + Vec3(0, 15, 0), ColouredParticleSystem::RandomVector(10.0) + Vec3(5, 5, 5));
 	box->ApplyImpulse(ColouredParticleSystem::RandomVector(0.2));
-	box->ApplyAngularMomentum(ColouredParticleSystem::RandomVector(1), ((float)rand() * 0.1) / RAND_MAX);
+	box->ApplyAngularMomentum(ColouredParticleSystem::RandomVector(1), ((float)rand() * 0.01) / RAND_MAX);
 	box->Colour = ColouredParticleSystem::RandomVector(1);
 	boxes.push_back(box);
 	PhysicsSystem::GetCurrentInstance()->AddRigidBody(box);

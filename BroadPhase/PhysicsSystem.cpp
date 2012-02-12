@@ -57,7 +57,7 @@ void PhysicsSystem::Integrate(float timeStep)
 void PhysicsSystem::AddRigidBody(RigidBody* bodyToAdd)
 {
 	rigidBodies.push_back(bodyToAdd);
-	broadPhase.bodies.push_back(bodyToAdd);
+	broadPhase.AddBody(bodyToAdd);
 }
 
 void PhysicsSystem::SetDebugDrawer(IDebugDrawer* debugDrawer)

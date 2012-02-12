@@ -3,7 +3,6 @@
 #include <vector>
 #define FIRSTOVERLAP 1
 #define SECONDOVERLAP 2
-#define THIRDOVERLAP 4
 
 class RigidBody;
 
@@ -27,24 +26,38 @@ public:
 	BroadPhase(void);
 	~BroadPhase(void);
 	std::vector<RigidBody*> bodies;	
+	std::vector<RigidBody*> newBodies;
 	void GenerateCollisions();
 	void AddBody(RigidBody* body);
+	void SetAxisOrder(int firstAxis, int secondAxis, int thirdAxis)
+	{
+		first = firstAxis;
+		second = secondAxis;
+		third = thirdAxis;
+	}
+	const std::vector<BroadPhasePair>& GetPairs() const
+	{
+		return pairs;
+	}
 private:
+	unsigned char overlapBitMask[8];
 	std::vector<BroadPhaseEntry> entries[3];
 	std::vector<BroadPhasePair> pairs;	
 	void GenerateEntries();
 	void SortEntries();
+	void AddEntries();
+	void AddEntry(RigidBody* body, int index);
 	void UpdateEntries();
 	bool needsResync;
 	int first;
 	int second;
 	int third;
-	std::vector<bool> colliding;
 	std::vector<int> indexActive;
-	bool* overlapMask;
+	unsigned char* overlapMask;
 	void ReallocateMask();
 	int maxPairs;
-	inline void SetMask(int index1, int index2, bool value)
+	int maskByteSize;
+	void SetMask(int index1, int index2, int pos)
 	{		
 		if (index1 > index2)
 		{
@@ -53,9 +66,12 @@ private:
 			index2 = index1;
 			index1 = i;
 		}
-		*(overlapMask + index1 + (index2 * bodies.size())) = value;
+		int flatIndex = index1 + index2 * bodies.size();
+		int maskIndex = flatIndex % 4;
+		flatIndex /= 4;
+		*(overlapMask + flatIndex) |= overlapBitMask[(maskIndex * 2) + pos];	
 	}
-	inline bool CheckMask(int index1, int index2)
+	bool CheckMask(int index1, int index2, int pos)
 	{
 		if (index1 > index2)
 		{
@@ -64,7 +80,10 @@ private:
 			index2 = index1;
 			index1 = i;
 		}
-		return *(overlapMask + index1 + (index2 * bodies.size()));
+		int flatIndex = index1 + index2 * bodies.size();
+		int maskIndex = flatIndex % 4;
+		flatIndex /= 4;
+		return *(overlapMask + flatIndex) & overlapBitMask[(maskIndex * 2) + pos];
 	}
 
 };
