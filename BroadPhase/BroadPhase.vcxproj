@@ -92,7 +92,6 @@
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="PhysicsSystem.h" />
     <ClInclude Include="Plane.h" />
-    <ClInclude Include="Quaternion.h" />
     <ClInclude Include="RigidBody.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

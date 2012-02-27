@@ -1,6 +1,5 @@
 #include "Box.h"
 #include "Contact.h"
-#include "Quaternion.h"
 
 Box::Box(Vec3 centre, Vec3 extents) : RigidBody()
 {
